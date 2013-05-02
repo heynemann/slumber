@@ -2,6 +2,7 @@
 
 import unittest
 import slumber
+import six
 
 
 class UtilsTestCase(unittest.TestCase):
@@ -48,15 +49,24 @@ class UtilsTestCase(unittest.TestCase):
         self.assertEqual(slumber.url_join("http://example.com/", "test/", "example/"), "http://example.com/test/example/")
 
     def test_url_join_encoded_unicode(self):
-        expected = "http://example.com/tǝst/"
+        expected = six.u("http://example.com/tǝst/")
 
-        url = slumber.url_join("http://example.com/", "tǝst/")
+        if expected.__class__.__name__ == "unicode":
+            expected = expected.encode('utf-8')
+
+        url = slumber.url_join("http://example.com/", six.u("tǝst/"))
+        if url.__class__.__name__ == "unicode":
+            url = url.encode('utf-8')
+
         self.assertEqual(url, expected)
 
-        url = slumber.url_join("http://example.com/", "tǝst/".decode('utf8').encode('utf8'))
+        url = slumber.url_join("http://example.com/", six.u("tǝst/"))
+        if url.__class__.__name__ == "unicode":
+            url = url.encode('utf-8')
+
         self.assertEqual(url, expected)
 
     def test_url_join_decoded_unicode(self):
-        url = slumber.url_join("http://example.com/", "tǝst/".decode('utf8'))
-        expected = "http://example.com/tǝst/".decode('utf8')
+        url = slumber.url_join("http://example.com/", six.u("tǝst/"))
+        expected = six.u("http://example.com/tǝst/")
         self.assertEqual(url, expected)

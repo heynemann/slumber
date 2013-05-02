@@ -1,5 +1,8 @@
 import posixpath
-import urlparse
+try:
+    from urllib.parse import urlsplit, urlunsplit
+except ImportError:
+    from urlparse import urlsplit, urlunsplit
 
 import requests
 
@@ -13,10 +16,10 @@ def url_join(base, *args):
     """
     Helper function to join an arbitrary number of url segments together.
     """
-    scheme, netloc, path, query, fragment = urlparse.urlsplit(base)
+    scheme, netloc, path, query, fragment = urlsplit(base)
     path = path if len(path) else "/"
     path = posixpath.join(path, *[('%s' % x) for x in args])
-    return urlparse.urlunsplit([scheme, netloc, path, query, fragment])
+    return urlunsplit([scheme, netloc, path, query, fragment])
 
 
 class ResourceAttributesMixin(object):
