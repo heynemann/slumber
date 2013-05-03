@@ -91,21 +91,24 @@ class Resource(ResourceAttributesMixin, object):
 
         return self.__class__(**kwargs)
 
-    def _request(self, method, data=None, files=None, params=None):
+    def _request(self, method, data=None, files=None, params=None, headers=None):
         s = self._store["serializer"]
         url = self._store["base_url"]
 
         if self._store["append_slash"] and not url.endswith("/"):
             url = url + "/"
 
-        headers = {"accept": s.get_content_type()}
+        _headers = {"accept": s.get_content_type()}
 
         if not files:
-            headers["content-type"] = s.get_content_type()
+            _headers["content-type"] = s.get_content_type()
             if data is not None:
                 data = s.dumps(data)
 
-        resp = self._store["session"].request(method, url, data=data, params=params, files=files, headers=headers)
+        if headers is not None:
+            _headers.update(headers)
+
+        resp = self._store["session"].request(method, url, data=data, params=params, files=files, headers=_headers)
 
         if 400 <= resp.status_code <= 499:
             raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
